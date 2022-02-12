@@ -25,28 +25,28 @@
             <div class="container-fluid vh-100"> 
 
                 <div class="row no-gutters my-3">
-                    <div class="col-lg-6 ">
+                    <div class="col-lg-6 col-md-12">
                         <div class="">
                             <svg id="simulation" width="630" height="360" ></svg>
                         </div>
                     </div>
         
-                    <div class="col-lg-6 bg-dark text-light p-3 rounded-left">
+                    <div class="col-lg-6 col-md-12 bg-dark text-light p-3 mt-md-4 rounded-left">
 						<div v-if="app_state > 0" class="row">
 
 							<div class="col-12">
 								<div class="row">
-									<div class="col-4">
-										<label class="font-weight-bold"> Threshold </label>
-										<input name="threshold" class="form-control-sm" type="number" v-model="threshold">
+									<div class="col-4 ">
+										<label class="font-weight-bold "> Threshold </label>
+										<input name="threshold" class="form-control-sm w-100" type="number" v-model="threshold">
 									</div>
-									<div class="col-4">
-										<label class="font-weight-bold"> Learning Rate </label>
-										<input name="learning_rate" class="form-control-sm" type="number" step="0.05" min="0" v-model="learning_rate">
+									<div class="col-4 ">
+										<label class="font-weight-bold "> Learning Rate </label>
+										<input name="learning_rate" class="form-control-sm w-100" type="number" step="0.05" min="0" v-model="learning_rate">
 									</div>
-									<div class="col-4">
-										<label class="font-weight-bold"> Max Epochs </label>
-										<input name="max_epochs" class="form-control-sm" type="number" v-model="max_epochs" min="1" max="10">
+									<div class="col-4 ">
+										<label class="font-weight-bold "> Max Epochs </label>
+										<input name="max_epochs" class="form-control-sm w-100" type="number" v-model="max_epochs" min="1" max="10">
 									</div>
 
 
