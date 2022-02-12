@@ -1,0 +1,119 @@
+:root {
+	--primary-color: #111;
+}
+
+body {
+	background-color: #111;
+}
+
+
+
+
+
+/*		
+ *		STATEFUL		============================================================================
+ **/
+
+.selected {
+	background-color: #ffd70042 !important;
+	color: white;
+}
+.selected td {
+	background-color: #ffd70042 !important;
+	border-bottom-color: gold;
+}
+
+
+
+
+
+/*
+ *		D3				============================================================================
+ **/
+.links line {
+  stroke: white;
+  stroke-width: 4px;
+
+  transition: all 40ms ease-in-out ;
+}
+.links line:hover {
+	stroke-width: 6px;
+}
+
+
+#simulation {
+	background-image: url("bg_pattern.png");
+	background-size: 15px;
+}
+
+.weights {
+	fill: white;
+	text-anchor: middle;
+}
+
+.nodes g circle {
+  pointer-events: all;
+  stroke-width: 4px;
+  stroke-dasharray: 6 6;
+  cursor: grab;
+  stroke: white;
+  fill: var(--primary-color);
+
+  transition: all 90ms ease-in-out ;
+}
+.nodes circle:hover {
+  stroke-dasharray: 0;
+  stroke: gold;
+}
+.nodes text {
+	fill: white;
+	font-weight: bold;
+	text-anchor: middle;
+}
+
+
+.node-thresh circle {
+	stroke: var(--primary-color) !important;
+	fill: gold !important;
+}
+.node-thresh text {
+	fill: var(--primary-color) !important;
+}
+
+
+
+
+
+/*		
+ *		BOOTSTRAP		============================================================================
+ **/
+.bg-dark {
+	background-color: #222 !important;
+}
+
+thead {
+	background-color: var(--primary-color);
+}
+thead th {
+	border: none !important;
+	background-color: var(--primary-color);
+}
+tr {
+	background-color: #222;
+}
+
+
+tr:hover td {
+	border-bottom-color: gold;
+}
+
+.table-dark.table-striped tbody tr:nth-of-type(2n+1) { 
+	background-color: #333 !important;
+}
+
+
+.btn-warning {
+	background-color: gold;
+	color: var(--primary-color);
+	font-weight: bold;
+}

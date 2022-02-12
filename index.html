@@ -1,0 +1,367 @@
+<html>
+<head>
+	<title>Perceptron Simulation</title>
+
+	<meta charset="utf-8">
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+	<script src="https://unpkg.com/vue@next" ></script>
+	<script src="https://d3js.org/d3.v7.min.js" ></script>
+
+	<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+	<div id="app" class="">
+	</div>
+
+	<script src="perceptron.js" ></script>
+	<script>
+			      
+
+    const App = { 
+		template: `
+            <div class="container-fluid vh-100"> 
+
+                <div class="row no-gutters my-3">
+                    <div class="col-lg-6 ">
+                        <div class="">
+                            <svg id="simulation" width="630" height="360" ></svg>
+                        </div>
+                    </div>
+        
+                    <div class="col-lg-6 bg-dark text-light p-3 rounded-left">
+						<div v-if="app_state > 0" class="row">
+
+							<div class="col-12">
+								<div class="row">
+									<div class="col-4">
+										<label class="font-weight-bold"> Threshold </label>
+										<input name="threshold" class="form-control-sm" type="number" v-model="threshold">
+									</div>
+									<div class="col-4">
+										<label class="font-weight-bold"> Learning Rate </label>
+										<input name="learning_rate" class="form-control-sm" type="number" min="0" v-model="learning_rate">
+									</div>
+									<div class="col-4">
+										<label class="font-weight-bold"> Max Epochs </label>
+										<input name="max_epochs" class="form-control-sm" type="number" v-model="max_epochs" min="1" max="10">
+									</div>
+
+
+
+									<div class="col-4 mt-4">
+                                        <label class="font-weight-bold"> Weight 1 </label>
+										<p class="text-muted"> -0.05 </p>
+                                    </div>
+                                    <div class="col-4 mt-4">
+                                        <label class="font-weight-bold"> Weight 2 </label>
+										<p class="text-muted"> 0 </p>
+                                    </div>
+								</div>
+                            </div>
+
+
+                            <div class="col-12 rounded mt-2">
+                                <table class="table table-striped table-sm table-bordered text-center table-dark mb-0 ">
+                                  <thead>
+                                    <tr>
+                                      <th scope="col"> Feature 1 </th>
+                                      <th scope="col"> Feature 2 </th>
+                                      <th scope="col"> Target </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr :class="{ 'selected': selected_target === 0}">
+                                        <td> 0 </td>
+                                        <td> 1 </td>
+                                        <td> 0 </td>
+                                    </tr>
+                                    <tr :class="{ 'selected': selected_target === 1}">
+                                        <td> 1 </td>
+                                        <td> 1 </td>
+                                        <td> 1 </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                            </div>
+                            
+
+                            <div class="col-12 mt-3">
+                                <button @click="runPerceptron" class="btn btn-warning float-right"> Run Perceptron</button>
+                            </div>
+                        </div>
+						<div v-else>
+							<h2 class="font-weight-bold">Perceptron Algorithm</h2>
+							<p>This is a small visualizer of the steps in a Perceptron Algorithm. The main goal is to have an interactive "simulation" of the Perceptron taught at Mohawk College.</p>
+							<p> Hope it's helpful to some :) </p>
+							<button @click="app_state = 1" class="btn btn-warning">
+								Continue
+							</button>
+						</div>
+
+                    </div>
+					
+                </div>
+
+                <div class="row no-gutters" style="height: calc(50% - 3rem); overflow-y: auto;">
+                    <div v-if="app_state === 2" class="col-12 bg-light">
+                        <table class="table text-center table-striped table-sm table-bordered table-dark mb-0">
+                          <thead class="sticky-top ">
+                            <tr>
+                              <th scope="col"> Epoch </th>
+                              <th scope="col"> F1 </th>
+                              <th scope="col"> F2 </th>
+                              <th scope="col"> W1 </th>
+                              <th scope="col"> W2 </th>
+                              <th scope="col"> Threshold </th>
+                              <th scope="col"> Activation </th>
+                              <th scope="col"> Output </th>
+                              <th scope="col"> Target </th>
+                              <th scope="col"> Adjust </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(run, index) in history" :key="run" @click="selected_row = index" style="cursor:pointer" :class="{ 'selected': selected_row === index}">
+                                <td v-for="data in run" :key="data"> {{ data }} </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+				   <div v-else-if="app_state == 1" class="d-flex align-items-center justify-content-center w-100">
+						<p class="w-100 text-center text-light">
+							Once you click the "Run Perceptron" button this area will be turned into a table displaying the data of each Run in every Epoch of the Perceptron.
+						</p>
+				   </div>
+                </div>
+            </div>
+        `,
+
+        data() {
+            return {
+				app_state: 0,		// 0 is "Just Opened the Site" - 1 is "Read Intro" - 2 is "Started Perceptron"
+                selected_row: 0,
+                selected_target: 0,
+                threshold: 0,
+                learning_rate: 0.05,
+                max_epochs: 10,
+                history: [],
+                epochs: [],
+                graph: {
+                    nodes: [
+                        {value: "Thresh", id: "t", x: 200, y: 200 },
+                        {value: "F1", id: "f1", x: 0, y: 0 },
+                        {value: "F2", id: "f2", x: 0, y: 300},
+                        {value: "Out", id: "o", x: 400, y: 200 },
+                    ],
+                    links: [
+                        {source: "t", target: "f1"},
+                        {source: "t", target: "f2"},
+                        {source: "o", target: "t"},
+                    ],
+					weights: [-0.05, 0]
+                }
+            };
+        },
+
+		watch: {
+
+			selected_row( new_value, old_value) {
+
+				// Get the Values from the Row and render it to D3
+				const row = this.history[ this.selected_row ];
+
+				this.graph.nodes[1].value = row[1];	// F1
+				this.graph.nodes[2].value = row[2]; // F2
+				this.graph.nodes[0].value = row[3]; // W1
+				this.graph.nodes[0].value = row[4]; // W2
+				this.graph.nodes[0].value = row[5]; // Threshold
+				//this.graph.nodes[0].value = row[6]; // Activation
+				this.graph.nodes[3].value = row[7]; // Output
+
+				this.updateSimulation();
+
+				// The Target Table row
+				this.selected_target = new_value % 2 === 0 ? 0 : 1; // Divisible by 2 because thats how many rows we have in the target table
+
+			}
+
+		},
+
+        methods: {
+
+			runPerceptron: function() {
+				this.app_state = 2;	
+				this.updateSimulation();
+			},
+            
+            updateSimulation: function() {
+
+
+				const sim = document.getElementById("simulation");
+                while( sim.firstChild ) {
+                    sim.removeChild( sim.lastChild ); // Its faster to remove the last item in an array
+                }
+
+                 // F1, F2
+                const data_set = [
+                    [0, 1],
+                    [1, 1]
+                ]
+                // TARGET
+                const data_labels = [
+                    0,
+                    1
+                ]
+
+                const p = Perceptron();
+
+                p.epoch_limit = this.max_epochs;
+                p.classify( data_set, data_labels, [-0.05, 0], this.threshold, this.learning_rate);
+
+                this.history = p.runs;
+
+
+
+                var svg		= d3.select("svg"),
+                    width	= +svg.attr("width"),
+                    height	= +svg.attr("height");
+
+                var simulation = d3.forceSimulation()
+									.force("collide", d3.forceCollide().radius(35))
+									.force("link", d3.forceLink()
+														.id(function(d) { return d.id; })
+														.distance( function(d) { return 180;} ))
+									.force("charge", d3.forceManyBody())
+									.force("center", d3.forceCenter(width / 2.3, height / 2).strength( 1.3 ) );
+
+
+				// LINKS 
+				var link = svg.append("g")
+								.attr("class", "links")
+								.selectAll("line")
+								.data(this.graph.links)
+								.enter()
+									.append("line");
+
+				// WEIGHTS 
+				var weight = svg.append("g")
+								.attr("class", "weights")
+								.selectAll("text")
+								.data( [0,-0.5] )
+								.enter()
+									.append("text")
+									.style( "fill", "gold")
+									.text( function(d, i) { return `x Weight ${i + 1}` } );
+
+				// NODES
+				var node = svg.append("g")
+								.attr("class", "nodes")
+								.selectAll("g")
+								.data(this.graph.nodes)
+
+                var elemEnter = node.enter()
+									.append("g")
+									.call(d3.drag()
+										.on("start", dragstarted)
+										.on("drag", dragged)
+										.on("end", dragended))
+
+				elemEnter.attr("class", function(d) {
+								return d.id == "t" ? "node-thresh" : "";
+							} )
+
+				var circle = elemEnter.append("circle")
+										.attr("r", function (d, index) {
+											return d.id == 'o' ? 25: ( d.id == 't' ? 40 : 30 ); 
+										})
+
+				elemEnter.append("text")
+							.attr("dy", function (d) {
+								return 3;
+							})
+							.text(function (d) {
+								return d.value; 
+							})
+                          
+                    
+
+
+                simulation.nodes(this.graph.nodes)
+							.on("tick", ticked);
+
+                simulation.force("link")
+							.links(this.graph.links);
+
+
+				// This is for the ticked function, this is how get the values of the Target/Source coordinates
+				let w = [ 
+					{ sx: 0, sy: 0, tx: 0, ty: 0 },
+					{ sx: 0, sy: 0, tx: 0, ty: 0 },
+					{ sx: 0, sy: 0, tx: 0, ty: 0 },
+				];
+
+				let padding = 85; // This is for the X distance padding for the "x Weights" text
+
+					
+
+                function ticked() {
+
+					link
+						.attr("x1", (d, index) => { w[index].sx = d.source.x; return d.source.x; })
+						.attr("y1", (d, index) => { w[index].sy = d.source.y; return d.source.y; })
+						.attr("x2", (d, index) => { w[index].tx = d.target.x; return d.target.x; })
+						.attr("y2", (d, index) => { w[index].ty = d.target.y; return d.target.y; });
+
+					elemEnter.attr("transform", function(d) { 
+								return "translate(" + d.x + "," + d.y + ")" 
+							} )
+
+					weight
+						.attr("dx", function(d, index) {
+							//const delta_x = Math.abs(w[index].sx - w[index].tx);
+							return w[index].tx + padding;		//source_x/y is the center of the Threshold Circle
+						} )
+						.attr("dy", function(d, index) {
+							//const delta_y = Math.abs(w[index].sy - w[index].ty);
+							return w[index].ty ;				//source_x/y is the center of the Threshold Circle
+						} )
+                  }
+
+
+
+                function dragstarted(event, d) {
+                  if (!event.active) simulation.alphaTarget(0.3).restart();
+                  d.fx = d.x;
+                  d.fy = d.y;
+                }
+
+                function dragged(event, d) {
+                  d.fx = event.x;
+                  d.fy = event.y;
+                }
+
+                function dragended(event, d) {
+                  if (!event.active) simulation.alphaTarget(0);
+                  d.fx = null;
+                  d.fy = null;
+                }   
+
+            }
+
+        },
+       
+        mounted() {
+            this.updateSimulation(); 
+        },
+
+    };
+
+
+    const app = Vue.createApp( App );
+    app.mount('#app');
+
+</script>
+</body>
+</html>
