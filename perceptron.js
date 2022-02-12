@@ -23,6 +23,7 @@ function Perceptron() {
                 console.warn( "\t\t\tThreshold: ", thresh);
 
                 const run = [];
+
                 run.push( i ); // epoch
                 run.push( ...data_set[row] );
                 run.push( ...weights );

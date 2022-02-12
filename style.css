@@ -101,6 +101,9 @@ thead th {
 tr {
 	background-color: #222;
 }
+.history td:first-child {
+	font-weight: bold;
+}
 
 
 tr:hover td {
@@ -116,4 +119,9 @@ tr:hover td {
 	background-color: gold;
 	color: var(--primary-color);
 	font-weight: bold;
+}
+
+.form-control-sm {
+	background-color: transparent;
+	color: white;
 }
